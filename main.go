@@ -14,13 +14,15 @@ var messages []Message
 func GetMessages(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		if err := DB.Find(&messages).Error; err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
 				Message: "Could not get message",
 			})
+			return
 		}
-		json.Marshal(messages)
-		fmt.Fprintln(w, messages)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(messages)
 	} else {
 		fmt.Fprintln(w, "Поддерживается только метод GET")
 	}
@@ -29,17 +31,19 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 func CreateMessage(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		message := Message{}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
-				Message: "Could not read body",
+				Message: "Could not create message",
 			})
 			return
 		}
 		json.Unmarshal(body, &message)
 		DB.Create(&message)
-		fmt.Fprintln(w, message)
+		json.NewEncoder(w).Encode(message)
 	} else {
 		fmt.Fprintln(w, "Поддерживается только метод POST")
 	}
@@ -48,17 +52,19 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPatch {
 		var updatedMessage Message
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		idParam := mux.Vars(r)["id"]
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
 				Message: "Bad ID",
 			})
 		}
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
 				Message: "Could not read body",
 			})
@@ -69,12 +75,12 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 			"task":    updatedMessage.Task,
 			"is_done": updatedMessage.IsDone,
 		}).Error; err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
 				Message: "Could not update message",
 			})
 		} else {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Success",
 				Message: "Message updated",
 			})
@@ -84,21 +90,23 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 
 func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		idParam := mux.Vars(r)["id"]
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
 				Message: "Bad ID",
 			})
 		}
 		if err := DB.Delete(&Message{}, id).Error; err != nil {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Error",
 				Message: "Could not delete message",
 			})
 		} else {
-			fmt.Fprintln(w, Response{
+			json.NewEncoder(w).Encode(Response{
 				Status:  "Success",
 				Message: "Message deleted",
 			})
