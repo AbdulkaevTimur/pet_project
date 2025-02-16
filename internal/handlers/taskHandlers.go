@@ -6,18 +6,18 @@ import (
 	"context"
 )
 
-type Handler struct {
-	Service *taskService.TaskService
+type TaskHandler struct {
+	TaskService *taskService.TaskService
 }
 
-func NewHandler(service *taskService.TaskService) *Handler {
-	return &Handler{
-		Service: service,
+func NewTaskHandler(taskService *taskService.TaskService) *TaskHandler {
+	return &TaskHandler{
+		TaskService: taskService,
 	}
 }
 
-func (h *Handler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
-	allTasks, err := h.Service.GetAllTasks()
+func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
+	allTasks, err := h.TaskService.GetAllTasks()
 	if err != nil {
 		return nil, err
 	}
@@ -35,13 +35,13 @@ func (h *Handler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObj
 	return response, nil
 }
 
-func (h *Handler) PostTasks(c context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
+func (h *TaskHandler) PostTasks(c context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
 	taskRequest := request.Body
 	taskToCreate := taskService.Message{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
 	}
-	createdTask, err := h.Service.CreateTask(taskToCreate)
+	createdTask, err := h.TaskService.CreateTask(taskToCreate)
 
 	if err != nil {
 		return nil, err
@@ -54,14 +54,14 @@ func (h *Handler) PostTasks(c context.Context, request tasks.PostTasksRequestObj
 	return response, nil
 }
 
-func (h *Handler) PatchTasksId(ctx context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
+func (h *TaskHandler) PatchTasksId(ctx context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
 	taskRequest := request.Body
 	id := request.Id
 	taskToUpdate := taskService.Message{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
 	}
-	updatedTask, err := h.Service.UpdateTaskByID(id, taskToUpdate)
+	updatedTask, err := h.TaskService.UpdateTaskByID(id, taskToUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +73,9 @@ func (h *Handler) PatchTasksId(ctx context.Context, request tasks.PatchTasksIdRe
 	return response, nil
 }
 
-func (h *Handler) DeleteTasksId(ctx context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
+func (h *TaskHandler) DeleteTasksId(ctx context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
 	id := request.Id
-	err := h.Service.DeleteTaskByID(id)
+	err := h.TaskService.DeleteTaskByID(id)
 	if err != nil {
 		return nil, err
 	} else {
