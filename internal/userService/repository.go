@@ -1,11 +1,16 @@
 package userService
 
-import "gorm.io/gorm"
+import (
+	"awesomeProject/internal/web/tasks"
+	"awesomeProject/pkg/utils"
+	"gorm.io/gorm"
+)
 
 type UsersRepository interface {
-	CreateUser(task User) (User, error)
+	CreateUser(name User) (User, error)
+	GetTasksForUser(userID uint) ([]tasks.Task, error)
 	GetAllUsers() ([]User, error)
-	UpdateUserByID(id uint, task User) (User, error)
+	UpdateUserByID(id uint, name User) (User, error)
 	DeleteUserByID(id uint) error
 }
 
@@ -18,11 +23,23 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 }
 
 func (r *userRepository) CreateUser(name User) (User, error) {
+	password := name.Password
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return User{}, err
+	}
+	name.Password = hashedPassword
 	result := r.db.Create(&name)
 	if result.Error != nil {
 		return User{}, result.Error
 	}
 	return name, nil
+}
+
+func (r *userRepository) GetTasksForUser(id uint) ([]tasks.Task, error) {
+	var tasksForUser []tasks.Task
+	err := r.db.Where("user_id = ?", id).Find(&tasksForUser).Error
+	return tasksForUser, err
 }
 
 func (r *userRepository) GetAllUsers() ([]User, error) {
@@ -32,9 +49,14 @@ func (r *userRepository) GetAllUsers() ([]User, error) {
 }
 
 func (r *userRepository) UpdateUserByID(id uint, name User) (User, error) {
+	password := name.Password
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return User{}, err
+	}
 	result := r.db.Model(&name).Where("id = ?", id).Updates(map[string]interface{}{
 		"email":    name.Email,
-		"password": name.Password,
+		"password": hashedPassword,
 	})
 	if result.Error != nil {
 		return User{}, result.Error
@@ -48,7 +70,7 @@ func (r *userRepository) UpdateUserByID(id uint, name User) (User, error) {
 }
 
 func (r *userRepository) DeleteUserByID(id uint) error {
-	result := r.db.Delete(&User{}, id)
+	result := r.db.Unscoped().Delete(&User{}, id)
 	if result.Error != nil {
 		return result.Error
 	}

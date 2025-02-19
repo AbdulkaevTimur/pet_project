@@ -8,15 +8,15 @@ func NewTaskService(repo MessageRepository) *TaskService {
 	return &TaskService{repo: repo}
 }
 
-func (s *TaskService) CreateTask(task Message) (Message, error) {
-	return s.repo.CreateTask(task)
+func (s *TaskService) CreateTaskByUserID(task Task, userID uint) (Task, error) {
+	return s.repo.CreateTaskByUserID(task, userID)
 }
 
-func (s *TaskService) GetAllTasks() ([]Message, error) {
-	return s.repo.GetAllTasks()
+func (s *TaskService) GetTasksByUserID(userID uint) ([]Task, error) {
+	return s.repo.GetTasksByUserID(userID)
 }
 
-func (s *TaskService) UpdateTaskByID(id uint, task Message) (Message, error) {
+func (s *TaskService) UpdateTaskByID(id uint, task Task) (Task, error) {
 	return s.repo.UpdateTaskByID(id, task)
 }
 

@@ -1,5 +1,7 @@
 package userService
 
+import "awesomeProject/internal/web/tasks"
+
 type UserService struct {
 	repo UsersRepository
 }
@@ -14,6 +16,10 @@ func (s *UserService) CreateUser(name User) (User, error) {
 
 func (s *UserService) GetAllUsers() ([]User, error) {
 	return s.repo.GetAllUsers()
+}
+
+func (s *UserService) GetTasksForUser(id uint) ([]tasks.Task, error) {
+	return s.repo.GetTasksForUser(id)
 }
 
 func (s *UserService) UpdateUserByID(id uint, name User) (User, error) {

@@ -4,7 +4,14 @@ info:
   description: API
   version: 1.0.0
 paths:
-  /tasks:
+  /tasks/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: uint
     get:
       summary: Get all tasks
       tags:
@@ -109,6 +116,19 @@ paths:
         schema:
           type: integer
           format: uint
+    get:
+      summary: Get tasks for user
+      tags:
+        - users
+      responses:
+        '200':
+          description: A list of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
     patch:
       summary: Update a user
       tags:
@@ -146,6 +166,9 @@ components:
           type: string
         is_done:
           type: boolean
+        user_id:
+          type: integer
+          format: uint
     User:
       type: object
       properties:
@@ -156,3 +179,7 @@ components:
           type: string
         password:
           type: string
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'

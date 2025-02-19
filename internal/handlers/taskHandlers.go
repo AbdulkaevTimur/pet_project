@@ -16,40 +16,44 @@ func NewTaskHandler(taskService *taskService.TaskService) *TaskHandler {
 	}
 }
 
-func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
-	allTasks, err := h.TaskService.GetAllTasks()
+func (h *TaskHandler) GetTasksUserId(ctx context.Context, request tasks.GetTasksUserIdRequestObject) (tasks.GetTasksUserIdResponseObject, error) {
+	userID := request.UserId
+	userTasks, err := h.TaskService.GetTasksByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	response := tasks.GetTasks200JSONResponse{}
+	response := tasks.GetTasksUserId200JSONResponse{}
 
-	for _, tsk := range allTasks {
+	for _, tsk := range userTasks {
 		task := tasks.Task{
 			Id:     &tsk.ID,
 			Task:   &tsk.Task,
 			IsDone: &tsk.IsDone,
+			UserId: &tsk.UserID,
 		}
 		response = append(response, task)
 	}
 	return response, nil
 }
 
-func (h *TaskHandler) PostTasks(c context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
+func (h *TaskHandler) PostTasksUserId(c context.Context, request tasks.PostTasksUserIdRequestObject) (tasks.PostTasksUserIdResponseObject, error) {
 	taskRequest := request.Body
-	taskToCreate := taskService.Message{
+	userID := request.UserId
+	taskToCreate := taskService.Task{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
 	}
-	createdTask, err := h.TaskService.CreateTask(taskToCreate)
+	createdTask, err := h.TaskService.CreateTaskByUserID(taskToCreate, userID)
 
 	if err != nil {
 		return nil, err
 	}
-	response := tasks.PostTasks201JSONResponse{
+	response := tasks.PostTasksUserId201JSONResponse{
 		Id:     &createdTask.ID,
 		Task:   &createdTask.Task,
 		IsDone: &createdTask.IsDone,
+		UserId: &createdTask.UserID,
 	}
 	return response, nil
 }
@@ -57,7 +61,7 @@ func (h *TaskHandler) PostTasks(c context.Context, request tasks.PostTasksReques
 func (h *TaskHandler) PatchTasksId(ctx context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
 	taskRequest := request.Body
 	id := request.Id
-	taskToUpdate := taskService.Message{
+	taskToUpdate := taskService.Task{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
 	}

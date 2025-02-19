@@ -35,6 +35,27 @@ func (h *UserHandler) GetUsers(ctx context.Context, request users.GetUsersReques
 	return response, nil
 }
 
+func (h *UserHandler) GetUsersId(c context.Context, request users.GetUsersIdRequestObject) (users.GetUsersIdResponseObject, error) {
+	id := request.Id
+	tasksForUser, err := h.UserService.GetTasksForUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := users.GetUsersId200JSONResponse{}
+
+	for _, tsk := range tasksForUser {
+		task := users.Task{
+			Id:     tsk.Id,
+			Task:   tsk.Task,
+			IsDone: tsk.IsDone,
+			UserId: tsk.UserId,
+		}
+		response = append(response, task)
+	}
+	return response, nil
+}
+
 func (h *UserHandler) PostUsers(c context.Context, request users.PostUsersRequestObject) (users.PostUsersResponseObject, error) {
 	userRequest := request.Body
 	userToCreate := userService.User{
