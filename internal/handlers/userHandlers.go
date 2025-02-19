@@ -35,14 +35,14 @@ func (h *UserHandler) GetUsers(ctx context.Context, request users.GetUsersReques
 	return response, nil
 }
 
-func (h *UserHandler) GetUsersId(c context.Context, request users.GetUsersIdRequestObject) (users.GetUsersIdResponseObject, error) {
-	id := request.Id
-	tasksForUser, err := h.UserService.GetTasksForUser(id)
+func (h *UserHandler) GetUsersUserIdTasks(c context.Context, request users.GetUsersUserIdTasksRequestObject) (users.GetUsersUserIdTasksResponseObject, error) {
+	userId := request.UserId
+	tasksForUser, err := h.UserService.GetTasksForUser(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	response := users.GetUsersId200JSONResponse{}
+	response := users.GetUsersUserIdTasks200JSONResponse{}
 
 	for _, tsk := range tasksForUser {
 		task := users.Task{
@@ -75,18 +75,18 @@ func (h *UserHandler) PostUsers(c context.Context, request users.PostUsersReques
 	return response, nil
 }
 
-func (h *UserHandler) PatchUsersId(ctx context.Context, request users.PatchUsersIdRequestObject) (users.PatchUsersIdResponseObject, error) {
+func (h *UserHandler) PatchUsersUserId(ctx context.Context, request users.PatchUsersUserIdRequestObject) (users.PatchUsersUserIdResponseObject, error) {
 	userRequest := request.Body
-	id := request.Id
+	userId := request.UserId
 	userToUpdate := userService.User{
 		Email:    *userRequest.Email,
 		Password: *userRequest.Password,
 	}
-	updatedUser, err := h.UserService.UpdateUserByID(id, userToUpdate)
+	updatedUser, err := h.UserService.UpdateUserByID(userId, userToUpdate)
 	if err != nil {
 		return nil, err
 	}
-	response := users.PatchUsersId200JSONResponse{
+	response := users.PatchUsersUserId200JSONResponse{
 		Id:       &updatedUser.ID,
 		Email:    &updatedUser.Email,
 		Password: &updatedUser.Password,
@@ -94,13 +94,13 @@ func (h *UserHandler) PatchUsersId(ctx context.Context, request users.PatchUsers
 	return response, nil
 }
 
-func (h *UserHandler) DeleteUsersId(ctx context.Context, request users.DeleteUsersIdRequestObject) (users.DeleteUsersIdResponseObject, error) {
-	id := request.Id
-	err := h.UserService.DeleteUserByID(id)
+func (h *UserHandler) DeleteUsersUserId(ctx context.Context, request users.DeleteUsersUserIdRequestObject) (users.DeleteUsersUserIdResponseObject, error) {
+	userId := request.UserId
+	err := h.UserService.DeleteUserByID(userId)
 	if err != nil {
 		return nil, err
 	} else {
-		response := users.DeleteUsersId204Response{}
+		response := users.DeleteUsersUserId204Response{}
 		return response, nil
 	}
 }

@@ -16,40 +16,38 @@ func NewTaskHandler(taskService *taskService.TaskService) *TaskHandler {
 	}
 }
 
-func (h *TaskHandler) GetTasksUserId(ctx context.Context, request tasks.GetTasksUserIdRequestObject) (tasks.GetTasksUserIdResponseObject, error) {
-	userID := request.UserId
-	userTasks, err := h.TaskService.GetTasksByUserID(userID)
+func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
+	userTasks, err := h.TaskService.GetTasks()
 	if err != nil {
 		return nil, err
 	}
 
-	response := tasks.GetTasksUserId200JSONResponse{}
+	response := tasks.GetTasks200JSONResponse{}
 
 	for _, tsk := range userTasks {
 		task := tasks.Task{
 			Id:     &tsk.ID,
 			Task:   &tsk.Task,
 			IsDone: &tsk.IsDone,
-			UserId: &tsk.UserID,
 		}
 		response = append(response, task)
 	}
 	return response, nil
 }
 
-func (h *TaskHandler) PostTasksUserId(c context.Context, request tasks.PostTasksUserIdRequestObject) (tasks.PostTasksUserIdResponseObject, error) {
+func (h *TaskHandler) PostTasks(c context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
 	taskRequest := request.Body
-	userID := request.UserId
 	taskToCreate := taskService.Task{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
+		UserID: *taskRequest.UserId,
 	}
-	createdTask, err := h.TaskService.CreateTaskByUserID(taskToCreate, userID)
+	createdTask, err := h.TaskService.CreateTaskByUserID(taskToCreate)
 
 	if err != nil {
 		return nil, err
 	}
-	response := tasks.PostTasksUserId201JSONResponse{
+	response := tasks.PostTasks201JSONResponse{
 		Id:     &createdTask.ID,
 		Task:   &createdTask.Task,
 		IsDone: &createdTask.IsDone,
