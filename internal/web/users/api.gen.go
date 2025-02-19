@@ -24,8 +24,8 @@ type Task struct {
 
 // User defines model for User.
 type User struct {
-	Email    *string `json:"email,omitempty"`
 	Id       *uint   `json:"id,omitempty"`
+	Email    *string `json:"email,omitempty"`
 	Password *string `json:"password,omitempty"`
 	Tasks    *[]Task `json:"tasks,omitempty"`
 }
